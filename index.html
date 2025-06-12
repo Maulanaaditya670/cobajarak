@@ -40,28 +40,32 @@
         <div class="mb-3">
           <label class="form-label">Harga</label>
           <select class="form-select" id="harga">
-            <option value="5">≤ 15.000</option>
-            <option value="4">15.001 - 25.000</option>
-            <option value="3">25.001 - 35.000</option>
-            <option value="2">35.001 - 50.000</option>
-            <option value="1">> 50.000</option>
+            <option value="5">Sangat Murah</option>
+            <option value="4">Murah</option>
+            <option value="3">Sedang</option>
+            <option value="2">Mahal</option>
+            <option value="1">Sangat Mahal</option>
           </select>
         </div>
 
         <div class="mb-3">
           <label class="form-label">Variasi Menu</label>
           <select class="form-select" id="menu">
-            <option value="1">Sedikit</option>
+            <option value="1">Sangat Sedikit</option>
+            <option value="2">Sedikit</option>
             <option value="3">Cukup</option>
-            <option value="5">Banyak</option>
+            <option value="4">Banyak</option>
+            <option value="5">Sangat Banyak</option>
           </select>
         </div>
 
         <div class="mb-3">
           <label class="form-label">Fasilitas</label>
           <select class="form-select" id="fasilitas">
-            <option value="1">Kurang</option>
+            <option value="1">Sangat Kurang</option>
+            <option value="2">Kurang</option>
             <option value="3">Cukup</option>
+            <option value="4">Baik</option>
             <option value="5">Lengkap</option>
           </select>
         </div>
@@ -69,8 +73,10 @@
         <div class="mb-3">
           <label class="form-label">Spot Foto</label>
           <select class="form-select" id="spot">
-            <option value="1">Kurang Menarik</option>
-            <option value="3">Menarik</option>
+            <option value="1">Sangat Tidak Menarik</option>
+            <option value="2">Kurang Menarik</option>
+            <option value="3">Cukup Menarik</option>
+            <option value="4">Menarik</option>
             <option value="5">Sangat Menarik</option>
           </select>
         </div>
@@ -78,8 +84,10 @@
         <div class="mb-3">
           <label class="form-label">Pelayanan</label>
           <select class="form-select" id="pelayanan">
-            <option value="1">Kurang Baik</option>
-            <option value="3">Baik</option>
+            <option value="1">Sangat Buruk</option>
+            <option value="2">Buruk</option>
+            <option value="3">Cukup</option>
+            <option value="4">Baik</option>
             <option value="5">Sangat Baik</option>
           </select>
         </div>
@@ -216,7 +224,6 @@
           .sort((a, b) => b.skor - a.skor);
       }
 
-      // Handle form
       formKriteria.addEventListener("submit", function (e) {
         e.preventDefault();
         if (!userLat || !userLng)
@@ -231,7 +238,6 @@
         const spot = parseInt(document.getElementById("spot").value);
         const pelayanan = parseInt(document.getElementById("pelayanan").value);
 
-        // Bobot kriteria (bisa kamu sesuaikan)
         const bobot = [0.15, 0.15, 0.2, 0.2, 0.15, 0.15];
 
         const alternatifTerpilih = coffeeShops
