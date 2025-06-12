@@ -2,110 +2,257 @@
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
-    <title>Rekomendasi Coffee Shop</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        padding: 20px;
-      }
-      #output {
-        margin-top: 20px;
-      }
-      .shop {
-        margin-bottom: 10px;
-      }
-    </style>
+    <title>Rekomendasi Coffee Shop - MOORA</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    />
   </head>
-  <body>
-    <h2>Rekomendasi Coffee Shop Terdekat</h2>
-    <p>
-      Klik tombol di bawah untuk mengetahui lokasi Anda dan menghitung jarak ke
-      coffee shop:
-    </p>
-    <button onclick="getUserLocation()">Ambil Lokasi Saya</button>
+  <body class="bg-light">
+    <div class="container mt-5">
+      <h2 class="text-center mb-4">Sistem Rekomendasi Coffee Shop (MOORA)</h2>
 
-    <div id="output"></div>
+      <form id="formKriteria">
+        <div class="mb-3">
+          <button
+            type="button"
+            class="btn btn-outline-primary btn-sm"
+            onclick="getUserLocation()"
+          >
+            Gunakan Lokasi Saya
+          </button>
+          <div id="lokasiStatus" class="form-text text-muted mt-2">
+            Belum mengambil lokasi.
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Radius Maksimal (km)</label>
+          <select class="form-select" id="radiusPilihan">
+            <option value="5">≤ 5 km</option>
+            <option value="10">≤ 10 km</option>
+            <option value="15">≤ 15 km</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Harga</label>
+          <select class="form-select" id="harga">
+            <option value="5">≤ 15.000</option>
+            <option value="4">15.001 - 25.000</option>
+            <option value="3">25.001 - 35.000</option>
+            <option value="2">35.001 - 50.000</option>
+            <option value="1">> 50.000</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Variasi Menu</label>
+          <select class="form-select" id="menu">
+            <option value="1">Sedikit</option>
+            <option value="3">Cukup</option>
+            <option value="5">Banyak</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Fasilitas</label>
+          <select class="form-select" id="fasilitas">
+            <option value="1">Kurang</option>
+            <option value="3">Cukup</option>
+            <option value="5">Lengkap</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Spot Foto</label>
+          <select class="form-select" id="spot">
+            <option value="1">Kurang Menarik</option>
+            <option value="3">Menarik</option>
+            <option value="5">Sangat Menarik</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Pelayanan</label>
+          <select class="form-select" id="pelayanan">
+            <option value="1">Kurang Baik</option>
+            <option value="3">Baik</option>
+            <option value="5">Sangat Baik</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">
+          Cari Rekomendasi
+        </button>
+      </form>
+
+      <div class="mt-5" id="hasilRekomendasi">
+        <h4>Hasil Rekomendasi:</h4>
+        <ol id="listRekomendasi"></ol>
+      </div>
+    </div>
 
     <script>
+      let userLat = null,
+        userLng = null;
+
       const coffeeShops = [
-        { name: "Coffee Shop Notre", lat: -7.32222, lng: 108.22272 },
-        { name: "Coffee Shop Todays", lat: -7.3205, lng: 108.21785 },
-        { name: "Coffee Shop C", lat: -7.36, lng: 108.225 },
+        {
+          nama: "Kopi Mantap",
+          lat: -7.33177,
+          lng: 108.20627,
+          harga: 4,
+          menu: 5,
+          fasilitas: 4,
+          spot: 3,
+          pelayanan: 4,
+        },
+        {
+          nama: "Kedai Senja",
+          lat: -7.31607,
+          lng: 108.21735,
+          harga: 3,
+          menu: 4,
+          fasilitas: 5,
+          spot: 4,
+          pelayanan: 3,
+        },
+        {
+          nama: "Coffee Time",
+          lat: -7.31899,
+          lng: 108.22356,
+          harga: 5,
+          menu: 3,
+          fasilitas: 3,
+          spot: 5,
+          pelayanan: 5,
+        },
+        {
+          nama: "Chill Brew",
+          lat: -7.3228,
+          lng: 108.21919,
+          harga: 2,
+          menu: 4,
+          fasilitas: 4,
+          spot: 4,
+          pelayanan: 5,
+        },
+        {
+          nama: "Ngopi Yuk",
+          lat: -6.8557,
+          lng: 107.92204,
+          harga: 1,
+          menu: 5,
+          fasilitas: 5,
+          spot: 5,
+          pelayanan: 4,
+        },
       ];
 
-      function getUserLocation() {
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(showDistances, showError);
-        } else {
-          alert("Geolocation tidak didukung oleh browser Anda.");
-        }
-      }
-
-      function showDistances(position) {
-        const userLat = position.coords.latitude;
-        const userLng = position.coords.longitude;
-        const outputDiv = document.getElementById("output");
-
-        outputDiv.innerHTML = `<p>Lokasi Anda: <strong>${userLat.toFixed(
-          5
-        )}, ${userLng.toFixed(5)}</strong></p>`;
-        outputDiv.innerHTML += `<h3>Hasil Perhitungan:</h3>`;
-
-        coffeeShops.forEach((shop) => {
-          const distance = getDistance(userLat, userLng, shop.lat, shop.lng);
-          const bobot = getBobot(distance);
-          outputDiv.innerHTML += `
-          <div class="shop">
-            <strong>${shop.name}</strong><br>
-            Jarak: ${distance.toFixed(2)} km<br>
-            Bobot: ${bobot}
-          </div>
-        `;
-        });
-      }
-
       function getDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371; // Radius bumi dalam km
-        const dLat = toRad(lat2 - lat1);
-        const dLon = toRad(lon2 - lon1);
+        const R = 6371;
+        const dLat = ((lat2 - lat1) * Math.PI) / 180;
+        const dLon = ((lon2 - lon1) * Math.PI) / 180;
         const a =
-          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-          Math.cos(toRad(lat1)) *
-            Math.cos(toRad(lat2)) *
-            Math.sin(dLon / 2) *
-            Math.sin(dLon / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c;
+          Math.sin(dLat / 2) ** 2 +
+          Math.cos((lat1 * Math.PI) / 180) *
+            Math.cos((lat2 * Math.PI) / 180) *
+            Math.sin(dLon / 2) ** 2;
+        return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
       }
 
-      function toRad(value) {
-        return (value * Math.PI) / 180;
+      function getUserLocation() {
+        const status = document.getElementById("lokasiStatus");
+        status.textContent = "Mengambil lokasi...";
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            userLat = pos.coords.latitude;
+            userLng = pos.coords.longitude;
+            status.textContent = `Lokasi didapat: ${userLat.toFixed(
+              4
+            )}, ${userLng.toFixed(4)}`;
+          },
+          () => {
+            status.textContent = "Gagal mendapatkan lokasi.";
+          }
+        );
       }
 
-      function getBobot(distance) {
-        if (distance <= 1) return 5;
-        else if (distance <= 2) return 4;
-        else if (distance <= 3) return 3;
-        else if (distance <= 4) return 2;
-        else return 1;
-      }
-
-      function showError(error) {
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            alert("Izin lokasi ditolak.");
-            break;
-          case error.POSITION_UNAVAILABLE:
-            alert("Informasi lokasi tidak tersedia.");
-            break;
-          case error.TIMEOUT:
-            alert("Permintaan lokasi melebihi waktu.");
-            break;
-          default:
-            alert("Terjadi kesalahan.");
-            break;
+      function normalize(matrix) {
+        const norm = [];
+        const cols = matrix[0].length;
+        for (let j = 0; j < cols; j++) {
+          let sum = 0;
+          for (let i = 0; i < matrix.length; i++) sum += matrix[i][j] ** 2;
+          let sqrtSum = Math.sqrt(sum);
+          norm.push(matrix.map((row) => row[j] / sqrtSum));
         }
+        return norm[0].map((_, i) => norm.map((col) => col[i]));
       }
+
+      function hitungMOORA(filtered, bobot) {
+        const matriks = filtered.map((cs) => [
+          cs.harga,
+          cs.jarak,
+          cs.menu,
+          cs.fasilitas,
+          cs.spot,
+          cs.pelayanan,
+        ]);
+        const norm = normalize(matriks);
+        return norm
+          .map((row, i) => {
+            const benefit =
+              row[2] * bobot[2] +
+              row[3] * bobot[3] +
+              row[4] * bobot[4] +
+              row[5] * bobot[5];
+            const cost = row[0] * bobot[0] + row[1] * bobot[1];
+            return { nama: filtered[i].nama, skor: benefit - cost };
+          })
+          .sort((a, b) => b.skor - a.skor);
+      }
+
+      // Handle form
+      formKriteria.addEventListener("submit", function (e) {
+        e.preventDefault();
+        if (!userLat || !userLng)
+          return alert("Silakan ambil lokasi Anda terlebih dahulu.");
+
+        const radius = parseFloat(
+          document.getElementById("radiusPilihan").value
+        );
+        const harga = parseInt(document.getElementById("harga").value);
+        const menu = parseInt(document.getElementById("menu").value);
+        const fasilitas = parseInt(document.getElementById("fasilitas").value);
+        const spot = parseInt(document.getElementById("spot").value);
+        const pelayanan = parseInt(document.getElementById("pelayanan").value);
+
+        // Bobot kriteria (bisa kamu sesuaikan)
+        const bobot = [0.15, 0.15, 0.2, 0.2, 0.15, 0.15];
+
+        const alternatifTerpilih = coffeeShops
+          .map((cs) => {
+            const jarak = getDistance(userLat, userLng, cs.lat, cs.lng);
+            return { ...cs, jarak: jarak };
+          })
+          .filter((cs) => cs.jarak <= radius);
+
+        if (alternatifTerpilih.length === 0) {
+          document.getElementById("listRekomendasi").innerHTML =
+            "<li>Tidak ada coffee shop dalam radius tersebut.</li>";
+          return;
+        }
+
+        const hasil = hitungMOORA(alternatifTerpilih, bobot);
+        document.getElementById("listRekomendasi").innerHTML = hasil
+          .map(
+            (h) =>
+              `<li><strong>${h.nama}</strong> (Skor: ${h.skor.toFixed(4)})</li>`
+          )
+          .join("");
+      });
     </script>
   </body>
 </html>
